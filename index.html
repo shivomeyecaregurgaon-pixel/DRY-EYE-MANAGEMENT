@@ -3,29 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Dry Eye Investigation - Shivom Eye Care</title>
+    <title>TFOS DEWS II Clinical Engine — Shivom Eye Care</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Interactive Element Transitions */
-        .branch-btn, .option-btn, .checkbox-card {
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
+        :root {
+            --navy: #1e3a5f;
+            --sky: #0284c7;
+            --mint: #16a34a;
+            --amber: #d97706;
+            --crimson: #dc2626;
         }
-        
-        /* Choice Selection States - Unified directly with the OSDI layout styles */
+        /* Interactive Element Transitions */
+        .branch-btn, .option-btn, .checkbox-card, input, select, textarea, button {
+            transition: all 0.2s ease-in-out;
+        }
         .checkbox-card {
+            cursor: pointer;
             border-color: #cbd5e1;
             color: #1e293b;
         }
         .checkbox-card:hover {
             background-color: #f8fafc;
         }
-        .checkbox-card.selected {
-            background-color: #eff6ff; 
-            border-color: #2563eb; 
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        .checkbox-card input:checked + div {
             font-weight: 800;
         }
+        /* Dynamic Selected States matching our core OSDI framework styles */
+        .checkbox-card-active {
+            background-color: #eff6ff !important;
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;
+        }
+        .gauge-needle-arc {
+            transform-origin: 130px 120px;
+            transition: transform 1.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            transform: rotate(-90deg);
+        }
+        /* Status Banner Views matching system criteria metrics */
+        .banner-view { padding: 16px; border-radius: 12px; text-align: center; font-size: 16px; font-weight: 800; margin-bottom: 20px; }
+        .pos-ded { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .neg-ded { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .pre-ded { background-color: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen font-sans text-gray-800 flex flex-col justify-between">
@@ -37,14 +55,11 @@
         };
     </script>
 
-    <!-- Header Branding Bar -->
     <header class="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-40 px-4 py-3">
         <div class="max-w-2xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <!-- Repository Linked Clinic Logo Image Asset -->
                 <img src="logo.png" alt="Shivom Eye Care Logo" class="h-12 w-auto object-contain" onerror="this.style.display='none'; document.getElementById('fallback-svg-logo').style.display='flex'">
                 
-                <!-- Fallback Icon if logo asset profile fails to load -->
                 <div id="fallback-svg-logo" class="hidden w-10 h-10 bg-blue-50 rounded-xl items-center justify-center border border-blue-100 flex-shrink-0">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"></path>
@@ -53,167 +68,299 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-black text-blue-900 tracking-tight">SHIVOM EYE CARE</h1>
-                    <p class="text-xs text-gray-500 font-medium">Dry Eye Clinical Workup & Investigation Profile</p>
+                    <p class="text-xs text-blue-600 font-extrabold tracking-wider uppercase">TFOS DEWS II Diagnostic Suite & Clinical Integration Engine</p>
                 </div>
             </div>
-            <span class="text-xs font-bold uppercase bg-blue-100 text-blue-800 px-3 py-1 rounded-full">Workup Log</span>
+            <span class="text-xs font-bold uppercase bg-blue-100 text-blue-800 px-3 py-1 rounded-full">Clinical Engine</span>
         </div>
     </header>
 
-    <!-- Content Chassis -->
     <main class="max-w-2xl w-full mx-auto px-4 py-6 flex-grow">
-        <form id="investigationForm" class="space-y-6" onsubmit="executeSubmissionPipeline(event)">
+        <form id="clinicForm" class="space-y-6" onsubmit="event.preventDefault(); processDryEyeEngine();">
             
-            <!-- Patient Demographics Section -->
-            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-5">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-4">
                 <div class="border-b border-gray-100 pb-3">
-                    <h2 class="text-lg font-bold text-gray-900">Clinical Case Intake</h2>
-                    <p class="text-xs text-gray-500">Record baseline patient identity metrics data fields below.</p>
-                </div>
-                
-                <!-- Clinic Branch Selector -->
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Clinic Location *</label>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div onclick="selectBranch('Gurugram', this)" class="branch-btn border-2 border-blue-200 text-blue-900 bg-blue-50/30 p-4 rounded-xl font-bold text-center hover:bg-blue-50">
-                            🏢 Gurugram
-                        </div>
-                        <div onclick="selectBranch('Kalkaji', this)" class="branch-btn border-2 border-indigo-200 text-indigo-900 bg-indigo-50/30 p-4 rounded-xl font-bold text-center hover:bg-indigo-50">
-                            🏢 Kalkaji (Delhi)
-                        </div>
-                    </div>
-                    <input type="hidden" id="selected_branch" name="branch" required>
+                    <h2 class="text-lg font-bold text-gray-900">Patient Profile & Visit Matrix</h2>
+                    <p class="text-xs text-gray-500">Record baseline patient identity metrics and clinical markers below.</p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Patient Full Name *</label>
-                        <input type="text" id="patient_name" name="patient_name" required class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wider">Select Operating Branch *</label>
+                        <select id="branch" required class="w-full border border-gray-300 rounded-xl p-3 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="Gurugram">Gurugram Center</option>
+                            <option value="Kalkaji">Kalkaji (Delhi)</option>
+                        </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Age *</label>
-                        <input type="number" name="age" required class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wider">Patient Full Name *</label>
+                        <input type="text" id="patientName" required placeholder="Jane Doe" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wider">Age *</label>
+                        <input type="number" id="age" required min="0" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wider">Contact Phone *</label>
+                        <input type="tel" id="phone" required placeholder="10-digit mobile" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wider">Date of Exam *</label>
+                        <input type="date" id="dateOfExam" required class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">WhatsApp Mobile Contact *</label>
-                        <input type="tel" name="phone" required class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wider">Ocular Surface Disease Index (OSDI) Score [0 - 100] *</label>
+                        <input type="number" id="osdi" min="0" max="100" step="0.1" required placeholder="e.g. 22.5" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Ocular History Notes / Symptoms</label>
-                        <input type="text" name="notes" placeholder="e.g., Burning sensation, redness" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wider">Last Date of Visit (Optional)</label>
+                        <input type="date" id="lastVisit" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wider">Current Management Drop/Therapy Routine</label>
+                        <input type="text" id="currTx" placeholder="e.g., CMC 0.5% drops since 3 months" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wider">Additional Slit Lamp General Clinical Notes</label>
+                        <textarea id="clinicalNotes" rows="2" placeholder="Enter localized lid pathology or general findings..." class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
                     </div>
                 </div>
             </div>
 
-            <!-- Investigation Checklist Checkboxes Group Section -->
             <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-4">
                 <div class="border-b border-gray-100 pb-3">
-                    <h2 class="text-lg font-bold text-gray-900">Clinical Diagnostics Matrix</h2>
-                    <p class="text-xs text-gray-500">Select all the investigative assessment parameters mapped for this tracking protocol run.</p>
+                    <h2 class="text-lg font-bold text-gray-900">Systemic Vulnerability Profiling Matrix</h2>
+                    <p class="text-xs text-gray-500">Select all presenting auto-immune flags or physiological markers.</p>
                 </div>
 
-                <div class="grid grid-cols-1 gap-3">
-                    <!-- Option 1 -->
-                    <label class="checkbox-card border-2 rounded-xl p-4 flex items-center justify-between" onclick="toggleCardHighlight(this)">
-                        <div class="flex items-center gap-3">
-                            <input type="checkbox" name="investigations" value="Tear Film Break-Up Time (TBUT)" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                            <span class="text-sm font-bold text-gray-800">Tear Film Break-Up Time (TBUT)</span>
-                        </div>
-                        <span class="text-[10px] uppercase font-extrabold tracking-wider bg-blue-50 px-2.5 py-1 rounded text-blue-700 border border-blue-100">Stability</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label class="checkbox-card border border-gray-200 rounded-xl p-3.5 flex items-center gap-3" onclick="syncCardStyle(this)">
+                        <input type="checkbox" id="sys_sjogren" value="Sjögren's Syndrome" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div class="text-xs font-bold text-gray-700">Sjögren's Syndrome (Autoimmune)</div>
                     </label>
-
-                    <!-- Option 2 -->
-                    <label class="checkbox-card border-2 rounded-xl p-4 flex items-center justify-between" onclick="toggleCardHighlight(this)">
-                        <div class="flex items-center gap-3">
-                            <input type="checkbox" name="investigations" value="Schirmer's Diagnostic Strip Profiling" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                            <span class="text-sm font-bold text-gray-800">Schirmer's Test (Volume Profiling)</span>
-                        </div>
-                        <span class="text-[10px] uppercase font-extrabold tracking-wider bg-blue-50 px-2.5 py-1 rounded text-blue-700 border border-blue-100">Volume</span>
+                    <label class="checkbox-card border border-gray-200 rounded-xl p-3.5 flex items-center gap-3" onclick="syncCardStyle(this)">
+                        <input type="checkbox" id="sys_ra" value="Rheumatoid Arthritis" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div class="text-xs font-bold text-gray-700">Rheumatoid Arthritis</div>
                     </label>
-
-                    <!-- Option 3 -->
-                    <label class="checkbox-card border-2 rounded-xl p-4 flex items-center justify-between" onclick="toggleCardHighlight(this)">
-                        <div class="flex items-center gap-3">
-                            <input type="checkbox" name="investigations" value="Ocular Surface Staining Score" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                            <span class="text-sm font-bold text-gray-800">Ocular Surface Fluorescein Staining</span>
-                        </div>
-                        <span class="text-[10px] uppercase font-extrabold tracking-wider bg-blue-50 px-2.5 py-1 rounded text-blue-700 border border-blue-100">Tissue Integrity</span>
+                    <label class="checkbox-card border border-gray-200 rounded-xl p-3.5 flex items-center gap-3" onclick="syncCardStyle(this)">
+                        <input type="checkbox" id="sys_thyroid" value="Thyroid Dysfunction" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div class="text-xs font-bold text-gray-700">Thyroid Eye Disease</div>
                     </label>
-
-                    <!-- Option 4 -->
-                    <label class="checkbox-card border-2 rounded-xl p-4 flex items-center justify-between" onclick="toggleCardHighlight(this)">
-                        <div class="flex items-center gap-3">
-                            <input type="checkbox" name="investigations" value="Meibomian Gland Evaluation" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                            <span class="text-sm font-bold text-gray-800">Meibography & Meibomian Gland Expression</span>
-                        </div>
-                        <span class="text-[10px] uppercase font-extrabold tracking-wider bg-blue-50 px-2.5 py-1 rounded text-blue-700 border border-blue-100">Lids & Glands</span>
+                    <label class="checkbox-card border border-gray-200 rounded-xl p-3.5 flex items-center gap-3" onclick="syncCardStyle(this)">
+                        <input type="checkbox" id="sys_diabetes" value="Diabetes Mellitus" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div class="text-xs font-bold text-gray-700">Diabetes Mellitus</div>
                     </label>
-
-                    <!-- Option 5 -->
-                    <label class="checkbox-card border-2 rounded-xl p-4 flex items-center justify-between" onclick="toggleCardHighlight(this)">
-                        <div class="flex items-center gap-3">
-                            <input type="checkbox" name="investigations" value="Tear Meniscus Height Evaluation" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                            <span class="text-sm font-bold text-gray-800">Tear Meniscus Height (TMH Analysis)</span>
-                        </div>
-                        <span class="text-[10px] uppercase font-extrabold tracking-wider bg-blue-50 px-2.5 py-1 rounded text-blue-700 border border-blue-100">Imaging Metrics</span>
+                    <label class="checkbox-card border border-gray-200 rounded-xl p-3.5 flex items-center gap-3" onclick="syncCardStyle(this)">
+                        <input type="checkbox" id="med_antihistamine" value="Antihistamines" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div class="text-xs font-bold text-gray-700">Systemic Antihistamines</div>
+                    </label>
+                    <label class="checkbox-card border border-gray-200 rounded-xl p-3.5 flex items-center gap-3" onclick="syncCardStyle(this)">
+                        <input type="checkbox" id="med_accutane" value="Isotretinoin" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div class="text-xs font-bold text-gray-700">Oral Isotretinoin (Accutane)</div>
                     </label>
                 </div>
+            </div>
 
-                <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-md hover:bg-blue-700 transition text-base mt-2">
-                    Submit Investigation Record →
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+                <div class="border-b border-gray-100 pb-2">
+                    <h2 class="text-lg font-bold text-gray-900">Bilateral Diagnostic Biomarker Mapping Panel</h2>
+                    <p class="text-xs text-gray-500">Input objective values obtained during slit-lamp diagnostic examination scans.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-50/50 border border-slate-200/60 p-4 rounded-2xl space-y-3.5">
+                        <div class="text-center font-black text-xs text-blue-700 tracking-wider bg-blue-50 rounded-lg py-1.5 border border-blue-100">RIGHT EYE (OD)</div>
+                        
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Tear Break-Up Time (TBUT) [sec] *</label>
+                            <input type="number" id="odTbut" step="0.1" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Schirmer I Volume [mm / 5min] *</label>
+                            <input type="number" id="odSchirmer" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Corneal Fluorescein [NEI Score 0-15] *</label>
+                            <input type="number" id="odStaining" max="15" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Lissamine Green [Score 0-9] *</label>
+                            <input type="number" id="odLissamine" max="9" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Tear Osmolarity [mOsm/L] *</label>
+                            <input type="number" id="odOsmolarity" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Tear Meniscus Height (TMH) [mm] *</label>
+                            <input type="number" id="odMeniscus" step="0.01" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Meibography Gland Dropout Rating *</label>
+                            <select id="odMeibography" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="0">Grade 0: Intact Structural Glands</option>
+                                <option value="1">Grade 1: Minimal Dropout (<33%)</option>
+                                <option value="2">Grade 2: Moderate Atrophy (33%-66%)</option>
+                                <option value="3">Grade 3: Severe Atrophy (>66%)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">MMP-9 (InflammaDry Marker) *</label>
+                            <select id="odMmp9" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="negative">Negative (-) No active inflammation</option>
+                                <option value="positive">Positive (+) Active inflammation</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Clinical MGD Expressibility Signs *</label>
+                            <select id="odMgd" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="Normal">Normal Clear Liquid Meibum</option>
+                                <option value="MGD">Thick / Plugged / Turbid Expression</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50/20 border border-amber-200/50 p-4 rounded-2xl space-y-3.5">
+                        <div class="text-center font-black text-xs text-amber-800 tracking-wider bg-amber-50 rounded-lg py-1.5 border border-amber-100">LEFT EYE (OS)</div>
+                        
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Tear Break-Up Time (TBUT) [sec] *</label>
+                            <input type="number" id="osTbut" step="0.1" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Schirmer I Volume [mm / 5min] *</label>
+                            <input type="number" id="osChirmer" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Corneal Fluorescein [NEI Score 0-15] *</label>
+                            <input type="number" id="osStaining" max="15" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Lissamine Green [Score 0-9] *</label>
+                            <input type="number" id="osLissamine" max="9" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Tear Osmolarity [mOsm/L] *</label>
+                            <input type="number" id="osOsmolarity" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Tear Meniscus Height (TMH) [mm] *</label>
+                            <input type="number" id="osMeniscus" step="0.01" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Meibography Gland Dropout Rating *</label>
+                            <select id="osMeibography" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="0">Grade 0: Intact Structural Glands</option>
+                                <option value="1">Grade 1: Minimal Dropout (<33%)</option>
+                                <option value="2">Grade 2: Moderate Atrophy (33%-66%)</option>
+                                <option value="3">Grade 3: Severe Atrophy (>66%)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">MMP-9 (InflammaDry Marker) *</label>
+                            <select id="osMmp9" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="negative">Negative (-) No active inflammation</option>
+                                <option value="positive">Positive (+) Active inflammation</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Clinical MGD Expressibility Signs *</label>
+                            <select id="osMgd" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="Normal">Normal Clear Liquid Meibum</option>
+                                <option value="MGD">Thick / Plugged / Turbid Expression</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-md hover:bg-blue-700 text-base mt-2">
+                    Process Analytics & Commit To Sheet Database →
                 </button>
             </div>
         </form>
 
-        <!-- Screen Capture Optimized Submission Modal Window Display -->
-        <div id="resultModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-            <div class="bg-white rounded-3xl max-w-md w-full p-6 text-center shadow-2xl space-y-5 transform scale-95 transition-all border border-gray-100">
-                <div class="w-14 h-14 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-2xl mx-auto font-bold">✓</div>
-                <div>
-                    <h3 class="text-xl font-black text-gray-900 tracking-tight">Investigation Registered</h3>
-                    <p class="text-xs text-gray-400 mt-0.5">Secure Clinic Operational Data Pipeline Summary</p>
-                </div>
+        <div id="resultsBlock" class="hidden mt-6 space-y-6">
+            
+            <div id="bannerStatus" class="banner-view shadow-sm"></div>
 
-                <!-- Structured Patient Metadata Overview Box Panel for Screen Capture Trace Logs -->
-                <div class="bg-slate-50 border border-gray-200/60 rounded-2xl p-4 text-left space-y-2 text-xs">
-                    <div class="flex justify-between items-center border-b border-gray-200/50 pb-2">
-                        <span class="text-gray-400 font-semibold uppercase tracking-wider text-[10px]">Patient Name:</span>
-                        <span id="modalPatientName" class="text-gray-900 font-extrabold text-sm">--</span>
+            <div class="bg-white border border-gray-200 rounded-2xl p-4 text-left space-y-2 text-xs shadow-sm">
+                <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                    <span class="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Patient Name:</span>
+                    <span id="tracePatientName" class="text-gray-900 font-extrabold text-sm">--</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center pt-1 font-semibold text-gray-700">
+                    <div class="bg-slate-50 p-2 rounded-lg border border-gray-100">
+                        <span class="block text-[9px] text-gray-400 uppercase tracking-widest font-bold">Branch</span>
+                        <span id="traceBranch" class="text-xs font-bold text-blue-800">--</span>
                     </div>
-                    <div class="flex justify-between items-center pt-1">
-                        <span class="text-gray-400 font-semibold uppercase tracking-wider text-[10px]">Date Logged:</span>
-                        <span id="modalDate" class="text-gray-800 font-bold">--</span>
+                    <div class="bg-slate-50 p-2 rounded-lg border border-gray-100">
+                        <span class="block text-[9px] text-gray-400 uppercase tracking-widest font-bold">Inspection Date</span>
+                        <span id="traceDate" class="text-xs font-bold">--</span>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-400 font-semibold uppercase tracking-wider text-[10px]">Timestamp Run:</span>
-                        <span id="modalTime" class="text-gray-800 font-bold">--</span>
-                    </div>
-                    <div class="flex justify-between items-center border-t border-gray-200/50 pt-2">
-                        <span class="text-gray-400 font-semibold uppercase tracking-wider text-[10px]">Clinic Branch:</span>
-                        <span id="modalBranch" class="text-blue-700 font-extrabold uppercase">--</span>
+                    <div class="bg-slate-50 p-2 rounded-lg border border-gray-100">
+                        <span class="block text-[9px] text-gray-400 uppercase tracking-widest font-bold">Execution Clock</span>
+                        <span id="traceTime" class="text-xs font-bold text-emerald-700">--</span>
                     </div>
                 </div>
+            </div>
 
-                <!-- Diagnostics Selected Count Panel Display Box - Styled matching the complete index score block layout -->
-                <div class="bg-gradient-to-b from-blue-50/50 to-blue-50/10 rounded-2xl p-4 border border-blue-100 shadow-inner text-center">
-                    <p class="text-xs font-bold text-blue-500 uppercase tracking-widest">Logged Profile Actions</p>
-                    <p id="modalCount" class="text-[13px] font-extrabold text-slate-800 mt-1.5 leading-relaxed">No elements mapped.</p>
+            <div class="bg-white rounded-2xl border border-gray-100 p-6 flex flex-col items-center justify-center shadow-sm">
+                <div class="font-extrabold text-[11px] mb-4 uppercase tracking-widest text-gray-400">Severity Matrix Index Dial</div>
+                <svg class="w-64 h-auto" viewBox="0 0 260 140">
+                    <path d="M20,120 A110,110 0 0,1 240,120" fill="none" stroke="#f1f5f9" stroke-width="20" stroke-linecap="round"/>
+                    <path d="M20,120 A110,110 0 0,1 93,40" fill="none" stroke="#16a34a" stroke-width="20"/>
+                    <path d="M93,40 A110,110 0 0,1 166,40" fill="none" stroke="#d97706" stroke-width="20"/>
+                    <path d="M166,40 A110,110 0 0,1 240,120" fill="none" stroke="#dc2626" stroke-width="20"/>
+                    <g id="needle" class="gauge-needle-arc">
+                        <polygon points="126,120 134,120 130,20" fill="#0f172a" />
+                        <circle cx="130" cy="120" r="7" fill="#0f172a"/>
+                    </g>
+                    <text x="32" y="135" font-size="9" font-weight="900" fill="#16a34a" font-family="sans-serif">MILD</text>
+                    <text x="110" y="30" font-size="9" font-weight="900" fill="#d97706" font-family="sans-serif">MODERATE</text>
+                    <text x="195" y="135" font-size="9" font-weight="900" fill="#dc2626" font-family="sans-serif">SEVERE</text>
+                </svg>
+                <div id="severityValue" class="text-xl font-black text-slate-900 mt-2 tracking-tight">CALCULATING...</div>
+            </div>
+
+            <div id="threatPanel" class="hidden bg-red-50 text-red-900 border-l-4 border-red-600 p-5 rounded-r-xl space-y-2 text-xs"></div>
+
+            <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-3 overflow-hidden">
+                <div class="text-xs font-black text-blue-600 uppercase tracking-widest border-b pb-2">Side-by-Side Homeostasis Audit Log</div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 font-bold border-b border-gray-100">
+                                <th class="p-3">Diagnostic Metric Assessed</th>
+                                <th class="p-3 text-center">Right Eye (OD)</th>
+                                <th class="p-3 text-center">Left Eye (OS)</th>
+                                <th class="p-3">TFOS Reference Boundaries</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditTableBody" class="divide-y divide-gray-50 font-medium"></tbody>
+                    </table>
                 </div>
-                <p class="text-[11px] text-gray-400 font-medium">Please screenshot this screen for confirmation records.</p>
+            </div>
+
+            <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-3">
+                <div class="text-xs font-black text-emerald-600 uppercase tracking-widest border-b pb-2">TFOS Step-Wise Clinical Directives</div>
+                <div id="treatmentOutput" class="space-y-2.5"></div>
             </div>
         </div>
     </main>
 
-    <!-- Clinic Profiles Footer Section Block Matrix -->
     <footer class="bg-white border-t border-gray-200 mt-auto w-full">
-        <div class="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        <div class="max-w-2xl mx-auto px-4 py-6 space-y-4">
             
-            <!-- Team Credentials Block -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-100 pb-5">
-                <!-- Dr. Kenshuk Marwah -->
                 <div class="flex gap-3 items-start">
                     <img class="w-12 h-12 rounded-full object-cover bg-blue-50 border-2 border-blue-100 flex-shrink-0" src="doctor-profile.png" alt="Dr. Kenshuk Marwah" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=KM'">
                     <div>
@@ -227,19 +374,22 @@
                     </div>
                 </div>
                 
-                <!-- Ms. Yamuna Acharya -->
                 <div class="flex gap-3 items-start border-t md:border-t-0 md:border-l border-gray-100 pt-3 md:pt-0 md:pl-4">
                     <img class="w-12 h-12 rounded-full object-cover bg-indigo-50 border-2 border-indigo-100 flex-shrink-0" src="Yamuna.png" alt="Ms. Yamuna Acharya" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=YA'">
                     <div>
                         <h4 class="text-xs font-bold text-gray-900 leading-tight">Ms. Yamuna Acharya (MOptom)</h4>
-                        <p class="text-[10px] text-indigo-600 font-bold mt-0.5">Senior Optometrist & Application Designer</p>
+                        <p class="text-[10px] text-indigo-600 font-bold mt-0.5">Senior Optometrist & Comprehensive Eye Care</p>
                         <p class="text-[10px] text-gray-500 font-medium mt-1">Refractive, Ocular Surface & Dry Eye Consultant</p>
                         <a href="mailto:yamunaacharya88@gmail.com" class="text-[10px] text-blue-500 hover:underline mt-0.5 inline-block">yamunaacharya88@gmail.com</a>
                     </div>
                 </div>
             </div>
 
-            <!-- Clinic Contact Locations Matrix -->
+            <div class="flex justify-between items-center text-[10px] text-gray-400 font-bold uppercase tracking-wider px-1">
+                <span>Designed by Yamuna Acharya, MOptom 2026</span>
+                <span>Supervised by Dr. Kenshuk Marwah</span>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div class="bg-slate-50 p-3.5 rounded-xl border flex flex-col justify-between">
                     <div>
@@ -266,104 +416,199 @@
         </div>
     </footer>
 
-    <!-- Form Dynamic Interactions Logic Orchestration -->
     <script>
-        // Branch Selection Toggle Control Engine
-        function selectBranch(branchName, element) {
-            document.getElementById('selected_branch').value = branchName;
-            document.querySelectorAll('.branch-btn').forEach(btn => {
-                btn.className = btn.innerHTML.includes('Gurugram') 
-                    ? "branch-btn border-2 border-blue-200 text-blue-900 bg-blue-50/30 p-4 rounded-xl font-bold text-center hover:bg-blue-50"
-                    : "branch-btn border-2 border-indigo-200 text-indigo-900 bg-indigo-50/30 p-4 rounded-xl font-bold text-center hover:bg-indigo-50";
-            });
-            
-            if(branchName === 'Gurugram') {
-                element.className = "branch-btn border-2 border-blue-600 bg-blue-600 text-white p-4 rounded-xl font-bold text-center ring-4 ring-blue-600/20 shadow-md";
-            } else {
-                element.className = "branch-btn border-2 border-indigo-600 bg-indigo-600 text-white p-4 rounded-xl font-bold text-center ring-4 ring-indigo-600/20 shadow-md";
-            }
-        }
+        // Set standard baseline date string value on load
+        document.getElementById('dateOfExam').value = new Date().toISOString().substring(0, 10);
 
-        // Checkbox Highlight State Sync Logic
-        function toggleCardHighlight(element) {
+        // Sync and highlight dynamic select card element layouts
+        function syncCardStyle(element) {
             const checkbox = element.querySelector('input[type="checkbox"]');
-            // Timeout avoids desyncing issues when hitting text directly
             setTimeout(() => {
-                if (checkbox.checked) {
-                    element.classList.add('selected');
+                if(checkbox.checked) {
+                    element.classList.add('checkbox-card-active');
                 } else {
-                    element.classList.remove('selected');
+                    element.classList.remove('checkbox-card-active');
                 }
             }, 50);
         }
 
-        // Endpoint Data Transmission Pipeline
-        async function executeSubmissionPipeline(event) {
-            event.preventDefault();
+        function processDryEyeEngine() {
+            var branch = document.getElementById('branch').value;
+            var patientName = document.getElementById('patientName').value;
+            var age = document.getElementById('age').value;
+            var phone = document.getElementById('phone').value;
+            var lastVisit = document.getElementById('lastVisit').value;
+            var currTx = document.getElementById('currTx').value;
+            var clinicalNotes = document.getElementById('clinicalNotes').value;
+            var osdi = parseFloat(document.getElementById('osdi').value);
 
-            const branchSelected = document.getElementById('selected_branch').value;
-            if(!branchSelected) {
-                alert("Please select an operating branch location before submitting profile data.");
-                return;
+            // Bilateral Input Extraction Vectors
+            var odTbut = parseFloat(document.getElementById('odTbut').value);
+            var osTbut = parseFloat(document.getElementById('osTbut').value);
+            var odSchirmer = parseInt(document.getElementById('odSchirmer').value);
+            var osSchirmer = parseInt(document.getElementById('osSchirmer').value);
+            var odStaining = parseInt(document.getElementById('odStaining').value);
+            var osStaining = parseInt(document.getElementById('osStaining').value);
+            var odLissamine = parseInt(document.getElementById('odLissamine').value);
+            var osLissamine = parseInt(document.getElementById('osLissamine').value);
+            var odOsmolarity = parseFloat(document.getElementById('odOsmolarity').value);
+            var osOsmolarity = parseFloat(document.getElementById('osOsmolarity').value);
+            var osmolDelta = Math.abs(odOsmolarity - osOsmolarity);
+            var odMeniscus = parseFloat(document.getElementById('odMeniscus').value);
+            var osMeniscus = parseFloat(document.getElementById('osMeniscus').value);
+            var odMeibography = parseInt(document.getElementById('odMeibography').value);
+            var osMeibography = parseInt(document.getElementById('osMeibography').value);
+            var odMmp9 = document.getElementById('odMmp9').value;
+            var osMmp9 = document.getElementById('osMmp9').value;
+            var odMgd = document.getElementById('odMgd').value;
+            var osMgd = document.getElementById('osMgd').value;
+
+            // Compile Systemic flags
+            var flags = [];
+            if(document.getElementById('sys_sjogren').checked) flags.push("Sjögren's Syndrome");
+            if(document.getElementById('sys_ra').checked) flags.push("Rheumatoid Arthritis");
+            if(document.getElementById('sys_thyroid').checked) flags.push("Thyroid Dysfunction");
+            if(document.getElementById('sys_diabetes').checked) flags.push("Diabetes Mellitus");
+            if(document.getElementById('med_antihistamine').checked) flags.push("Systemic Antihistamines");
+            if(document.getElementById('med_accutane').checked) flags.push("Oral Isotretinoin");
+            var flagsText = flags.length > 0 ? flags.join(", ") : "None Hooked";
+
+            // Diagnostic Path Logical Verifications
+            var symptomPos = osdi >= 13;
+            var odHomeoBroken = (odTbut < 10 || odOsmolarity >= 300 || osmolDelta >= 8 || odStaining > 5 || odLissamine > 9);
+            var osHomeoBroken = (osTbut < 10 || osOsmolarity >= 300 || osmolDelta >= 8 || osStaining > 5 || osLissamine > 9);
+            var diagnosis = symptomPos && (odHomeoBroken || osHomeoBroken) ? "Positive DED" : (symptomPos ? "Pre-Clinical Matrix" : "Negative Normal");
+
+            // Evaluate Severity Conditions Matrix & Gauge Rotations
+            var severity = "Mild"; var deg = -45;
+            if(osdi >= 33 || odSchirmer < 5 || osSchirmer < 5 || odMeibography === 3 || osMeibography === 3) { severity = "Severe"; deg = 45; }
+            else if(osdi >= 23 || odOsmolarity >= 320 || osOsmolarity >= 320 || odMeibography === 2 || osMeibography === 2) { severity = "Moderate"; deg = 0; }
+            if(diagnosis === "Negative Normal") { severity = "Normal Boundaries"; deg = -90; }
+
+            // Subtype Overlap Categorization Logic 
+            var adde = (odSchirmer < 10 || osSchirmer < 10 || odMeniscus < 0.2 || osMeniscus < 0.2);
+            var ede = (odMeibography >= 1 || osMeibography >= 1 || odMgd === 'MGD' || osMgd === 'MGD');
+            var subtype = "Negative Base";
+            if (diagnosis !== "Negative Normal") {
+                if(adde && ede) subtype = "Mixed Etiology (ADDE + EDE Overlap)";
+                else if(adde) subtype = "Aqueous Deficient (ADDE)";
+                else if(ede) subtype = "Evaporative Dry Eye (EDE/MGD Dominant)";
+                else subtype = "Early Unclassified Variant";
             }
 
-            // Verify at least one item is chosen
-            const checkBoxes = document.querySelectorAll('input[name="investigations"]:checked');
-            if (checkBoxes.length === 0) {
-                alert("Please tick at least one clinical investigation component parameter run.");
-                return;
+            // Bind Screenshot Log Data Values 
+            document.getElementById('tracePatientName').innerText = patientName;
+            document.getElementById('traceBranch').innerText = branch.toUpperCase();
+            document.getElementById('traceDate').innerText = document.getElementById('dateOfExam').value.split('-').reverse().join('/');
+            document.getElementById('traceTime').innerText = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+            // Apply Context Banner Styles
+            var banner = document.getElementById('bannerStatus');
+            if(diagnosis === "Positive DED") {
+                banner.className = "banner-view pos-ded";
+                banner.innerHTML = "DIAGNOSIS CONCLUDED: Positive Dry Eye Disease (DED)<br><span class='text-xs font-normal block mt-1 text-red-700/90'>Subtype Track: <strong>"+subtype+"</strong> | Grade: <strong>"+severity+"</strong></span>";
+            } else if(diagnosis === "Pre-Clinical Matrix") {
+                banner.className = "banner-view pre-ded";
+                banner.innerHTML = "PRE-CLINICAL PHENOTYPE: Surface Symptoms Logged Without Signs Matrix Clear";
+            } else {
+                banner.className = "banner-view neg-ded";
+                banner.innerHTML = "DIAGNOSIS CONCLUDED: Negative Normal Homeostasis Functional Profile";
             }
 
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Transmitting to Google Sheet...";
+            // Animate Gauge Metrics Indicators
+            document.getElementById('needle').style.transform = "rotate("+deg+"deg)";
+            document.getElementById('severityValue').innerText = severity.toUpperCase();
 
-            const form = document.getElementById('investigationForm');
-            const patientNameVal = document.getElementById('patient_name').value;
-            const targetBranchVal = document.getElementById('selected_branch').value;
+            // Render Vulnerability Alert Warnings Panel
+            var tPanel = document.getElementById('threatPanel');
+            if(flags.length > 0) {
+                var threatHTML = "<strong class='text-red-800 uppercase tracking-wide font-black block mb-1.5 text-xs'>⚠️ Critical Medically Managed Threat Warnings:</strong><ul class='list-disc pl-4 space-y-1'>";
+                flags.forEach(function(f){
+                    if(f==="Sjögren's Syndrome" || f==="Rheumatoid Arthritis") {
+                        threatHTML += "<li><strong>" + f + " Risk Alert:</strong> Implicates severe immune-driven lacrimal tissue fibrosis. Risk profile includes progressive sterile corneal melt and structural perforation threat vectors. Urgent systemic coordination with rheumatology required.</li>";
+                    } else if(f==="Oral Isotretinoin") {
+                        threatHTML += "<li><strong>Isotretinoin Medication Matrix:</strong> Causes permanent cellular apoptosis within the meibomian oil glands. Highly destructive threat matrix leading to chronic drop-out. Consideration for alternative therapeutic routes recommended.</li>";
+                    } else if(f==="Diabetes Mellitus") {
+                        threatHTML += "<li><strong>Neurotrophic Sign Variant:</strong> Chronically reduces sub-basal corneal nerve endings density. The eye can develop progressive neurotrophic ulceration pathways due to masked sensory signaling.</li>";
+                    } else {
+                        threatHTML += "<li><strong>" + f + " Complication:</strong> Exacerbates evaporation and destabilizes standard functional lubrication patterns.</li>";
+                    }
+                });
+                threatHTML += "</ul>";
+                tPanel.innerHTML = threatHTML; tPanel.style.display="block";
+            } else { tPanel.style.display="none"; }
 
-            const trackingTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-            const trackingDate = new Date().toLocaleDateString('en-GB'); // Formats cleanly as DD/MM/YYYY
+            // Build Row Highlights dynamically within the audit metrics layout
+            document.getElementById('auditTableBody').innerHTML = `
+                <tr class="hover:bg-slate-50/60"><td class="p-3 text-slate-700 font-semibold">Tear Break-Up Time (TBUT)</td><td align="center" class="p-3 ${odTbut<10?'text-red-600 font-extrabold':''}">${odTbut}s</td><td align="center" class="p-3 ${osTbut<10?'text-red-600 font-extrabold':''}">${osTbut}s</td><td class="p-3 text-gray-500 font-semibold">&ge; 10 seconds</td></tr>
+                <tr class="hover:bg-slate-50/60"><td class="p-3 text-slate-700 font-semibold">Schirmer I Volume</td><td align="center" class="p-3 ${odSchirmer<10?'text-red-600 font-extrabold':''}">${odSchirmer}mm</td><td align="center" class="p-3 ${osSchirmer<10?'text-red-600 font-extrabold':''}">${osSchirmer}mm</td><td class="p-3 text-gray-500 font-semibold">&ge; 10 mm / 5 min</td></tr>
+                <tr class="hover:bg-slate-50/60"><td class="p-3 text-slate-700 font-semibold">Tear Osmolarity Level</td><td align="center" class="p-3 ${odOsmolarity>=300?'text-red-600 font-extrabold':''}">${odOsmolarity}</td><td align="center" class="p-3 ${osOsmolarity>=300?'text-red-600 font-extrabold':''}">${osOsmolarity}</td><td class="p-3 text-gray-500 font-semibold">&lt; 300 mOsm/L (Delta &lt; 8)</td></tr>
+                <tr class="hover:bg-slate-50/60"><td class="p-3 text-slate-700 font-semibold">Epithelial Staining (NEI)</td><td align="center" class="p-3 ${odStaining>5?'text-red-600 font-extrabold':''}">${odStaining}</td><td align="center" class="p-3 ${osStaining>5?'text-red-600 font-extrabold':''}">${osStaining}</td><td class="p-3 text-gray-500 font-semibold">&le; 5 units max</td></tr>
+                <tr class="hover:bg-slate-50/60"><td class="p-3 text-slate-700 font-semibold">MMP-9 Tissue Inflammation</td><td align="center" class="p-3 ${odMmp9==='positive'?'text-red-600 font-extrabold':''}">${odMmp9.toUpperCase()}</td><td align="center" class="p-3 ${osMmp9==='positive'?'text-red-600 font-extrabold':''}">${osMmp9.toUpperCase()}</td><td class="p-3 text-gray-500 font-semibold">Negative Normal Baseline</td></tr>
+            `;
 
-            // Collate Array items into a clean comma-separated list string
-            const elementsSelected = Array.from(checkBoxes).map(cb => cb.value).join(', ');
+            // Evaluate Directives
+            var txDiv = document.getElementById('treatmentOutput');
+            var txHTML = "<div class='p-3 rounded-xl text-xs font-semibold bg-slate-50 border border-slate-200 border-l-4 border-l-slate-600 text-slate-700'><strong>TFOS Step 1 Foundational Rules (All Profiles):</strong> Digital blinking pattern modifications, 20-20-20 visual health exercises, environmental humidity control, and preservative-free artificial lubricant drops.</div>";
+            
+            if(ede) {
+                txHTML += "<div class='p-3 rounded-xl text-xs font-semibold bg-blue-50/40 border border-blue-100 border-l-4 border-l-blue-600 text-blue-900'><strong>TFOS Step 2 Evaporative (EDE/MGD Tracker):</strong> Introduce targeted lipid-emulsion artificial drops. Initiate consistent evening warm compresses (10 mins, 40°C), mechanical lid hygiene scrubs, or schedule options for in-office thermal pulsation therapy (LipiFlow) / intense regulated pulsed light (IRPL) treatments.</div>";
+            }
+            if(odMmp9==='positive' || osMmp9==='positive' || severity==="Moderate" || severity==="Severe") {
+                txHTML += "<div class='p-3 rounded-xl text-xs font-semibold bg-red-50/40 border border-red-100 border-l-4 border-l-red-600 text-red-900'><strong>TFOS Step 2 Targeted Anti-Inflammatory Pulse Therapy:</strong> Positive matrix cellular MMP-9 metrics verify severe ongoing ocular surface stress. Initiate a soft topical corticosteroid pulse schedule (e.g., Loteprednol Etabonate 0.5% QID for 4 weeks) bridged with daily long-term immunomodulators (Cyclosporine A / Lifitegrast) to eliminate structural surface friction.</div>";
+            }
+            if(severity === "Severe") {
+                txHTML += "<div class='p-3 rounded-xl text-xs font-semibold bg-purple-50/40 border border-purple-100 border-l-4 border-l-purple-600 text-purple-900'><strong>TFOS Step 3/4 Advanced Critical Interventions:</strong> Evaluate candidate fit for autologous serum eye drops (20% to 50% titration), therapeutic moisture-chamber gas-permeable scleral contact lenses, or permanent punctal plug occlusion optimization tracks.</div>";
+            }
 
-            const payload = {
-                timestamp: trackingTime,
-                date: trackingDate,
-                patient_name: patientNameVal,
-                age: form.age.value,
-                phone: form.phone.value,
-                notes: form.notes.value || "None logged",
-                branch: targetBranchVal,
-                investigations_profile: elementsSelected
+            var nextFollow = (severity==="Severe" || odMmp9==='positive' || osMmp9==='positive') ? "2 to 4 Weeks Immediate Post-Therapy Check" : "3 to 4 Months Routine Tracker Panel";
+            txHTML += "<div class='p-3 rounded-xl text-xs font-extrabold bg-blue-600 border border-blue-700 text-white shadow-sm'>🗓️ SHIVOM CLINIC FOLLOW-UP MATRIX: Window targeted for: "+nextFollow+"</div>";
+            
+            txDiv.innerHTML = txHTML;
+            
+            // Show Block & Scroll smoothly into viewpoint
+            var blockRes = document.getElementById('resultsBlock');
+            blockRes.classList.remove('hidden');
+            blockRes.scrollIntoView({ behavior: 'smooth' });
+
+            // Package Pipeline Data Payload
+            var dataPayload = {
+                timestamp: new Date().toLocaleString(),
+                dateOfExam: document.getElementById('dateOfExam').value,
+                branch: branch,
+                patientName: patientName,
+                age: age,
+                phone: phone,
+                lastVisit: lastVisit || "N/A",
+                osdi: osdi,
+                currTx: currTx || "None",
+                clinicalNotes: clinicalNotes || "None",
+                systemicFlags: flagsText,
+                odTbut: odTbut, osTbut: osTbut,
+                odSchirmer: odSchirmer, osSchirmer: osSchirmer,
+                odStaining: odStaining, osStaining: osStaining,
+                odOsmolarity: odOsmolarity, osOsmolarity: osOsmolarity,
+                osmolDelta: osmolDelta,
+                odMeniscus: odMeniscus, osMeniscus: osMeniscus,
+                odMeibography: odMeibography, osMeibography: osMeibography,
+                odLissamine: odLissamine, osLissamine: osLissamine,
+                odMmp9: odMmp9, osMmp9: osMmp9,
+                odMgd: odMgd, osMgd: osMgd,
+                diagnosis: diagnosis,
+                subtype: subtype,
+                severity: severity,
+                inflammActive: (odMmp9==='positive' || osMmp9==='positive') ? "Yes" : "No"
             };
 
-            try {
-                // Outbound POST request payload to Web App script engine
-                await fetch(CONFIG.GOOGLE_SHEET_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                // Display tracking confirmation parameters within screenshot canvas view
-                document.getElementById('modalPatientName').innerText = patientNameVal;
-                document.getElementById('modalDate').innerText = trackingDate;
-                document.getElementById('modalTime').innerText = trackingTime;
-                document.getElementById('modalBranch').innerText = targetBranchVal;
-                document.getElementById('modalCount').innerText = `${elementsSelected}`;
-
-                document.getElementById('resultModal').style.display = 'flex';
-                form.reset();
-                document.querySelectorAll('.checkbox-card').forEach(card => card.classList.remove('selected'));
-            } catch(err) {
-                alert("Data sync fallback exception caught.");
-                console.error(err);
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Submit Investigation Record";
-            }
+            // Post transaction tracking request payload package
+            fetch(CONFIG.GOOGLE_SHEET_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataPayload)
+            }).then(() => {
+                console.log("Transmission sync successful.");
+            }).catch(err => console.error("Pipeline failure exception:", err));
         }
     </script>
 </body>
