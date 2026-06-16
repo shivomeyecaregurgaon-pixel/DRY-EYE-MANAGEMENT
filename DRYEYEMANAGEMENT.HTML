@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Dry Eye Investigation - Shivom Eye Care</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Interactive Element Transitions */
+        .branch-btn, .option-btn, .checkbox-card {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        
+        /* Choice Selection States - Unified directly with the OSDI layout styles */
+        .checkbox-card {
+            border-color: #cbd5e1;
+            color: #1e293b;
+        }
+        .checkbox-card:hover {
+            background-color: #f8fafc;
+        }
+        .checkbox-card.selected {
+            background-color: #eff6ff; 
+            border-color: #2563eb; 
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-gray-800 flex flex-col justify-between">
+
+    <script>
+        const CONFIG = {
+            // Your secondary Google Apps Script endpoint URL
+            GOOGLE_SHEET_URL: "https://script.google.com/macros/s/AKfycbxhwF0IJve6liA4DCxqFRFWugrqVYo0w-P0gqMq9lfWmepI50rQdW9SNkkFC6vAscI7yQ/exec"
+        };
+    </script>
+
+    <!-- Header Branding Bar -->
+    <header class="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-40 px-4 py-3">
+        <div class="max-w-2xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <!-- Repository Linked Clinic Logo Image Asset -->
+                <img src="logo.png" alt="Shivom Eye Care Logo" class="h-12 w-auto object-contain" onerror="this.style.display='none'; document.getElementById('fallback-svg-logo').style.display='flex'">
+                
+                <!-- Fallback Icon if logo asset profile fails to load -->
+                <div id="fallback-svg-logo" class="hidden w-10 h-10 bg-blue-50 rounded-xl items-center justify-center border border-blue-100 flex-shrink-0">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black text-blue-900 tracking-tight">SHIVOM EYE CARE</h1>
+                    <p class="text-xs text-gray-500 font-medium">Dry Eye Clinical Workup & Investigation Profile</p>
+                </div>
+            </div>
+            <span class="text-xs font-bold uppercase bg-blue-100 text-blue-800 px-3 py-1 rounded-full">Workup Log</span>
+        </div>
+    </header>
+
+    <!-- Content Chassis -->
+    <main class="max-w-2xl w-full mx-auto px-4 py-6 flex-grow">
+        <form id="investigationForm" class="space-y-6" onsubmit="executeSubmissionPipeline(event)">
+            
+            <!-- Patient Demographics Section -->
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-5">
+                <div class="border-b border-gray-100 pb-3">
+                    <h2 class="text-lg font-bold text-gray-900">Clinical Case Intake</h2>
+                    <p class="text-xs text-gray-500">Record baseline patient identity metrics data fields below.</p>
+                </div>
+                
+                <!-- Clinic Branch Selector -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Clinic Location *</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div onclick="selectBranch('Gurugram', this)" class="branch-btn border-2 border-blue-200 text-blue-900 bg-blue-50/30 p-4 rounded-xl font-bold text-center hover:bg-blue-50">
+                            🏢 Gurugram
+                        </div>
+                        <div onclick="selectBranch('Kalkaji', this)" class="branch-btn border-2 border-indigo-200 text-indigo-900 bg-indigo-50/30 p-4 rounded-xl font-bold text-center hover:bg-indigo-50">
+                            🏢 Kalkaji (Delhi)
+                        </div>
+                    </div>
+                    <input type="hidden" id="selected_branch" name="branch" required>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Patient Full Name *</label>
+                        <input type="text" id="patient_name" name="patient_name" required class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Age *</label>
+                        <input type="number" name="age" required class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">WhatsApp Mobile Contact *</label>
+                        <input type="tel" name="phone" required class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Ocular History Notes / Symptoms</label>
+                        <input type="text" name="notes" placeholder="e.g., Burning sensation, redness" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Investigation Checklist Checkboxes Group Section -->
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+                <div class="border-b border-gray-100 pb-3">
+                    <h2 class="text-lg font-bold text-gray-900">Clinical Diagnostics Matrix</h2>
+                    <p class="text-xs text-gray-500">Select all the investigative assessment parameters mapped for this tracking protocol run.</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3">
+                    <!-- Option 1 -->
+                    <label class="checkbox-card border-2 rounded-xl p-4 flex items-center justify-between" onclick="toggleCardHighlight(this)">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" name="investigations" value="Tear Film Break-Up Time (TBUT)" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                            <span class="text-sm font-bold text-gray-800">Tear Film Break-Up Time (TBUT)</span>
+                        </div>
+                        <span class="text-[10px] uppercase font-extrabold tracking-wider bg-blue-50 px-2.5 py-1 rounded text-blue-700 border border-blue-100">Stability</span>
+                    </label>
+
+                    <!-- Option 2 -->
+                    <label class="checkbox-card border-2 rounded-xl p-4 flex items-center justify-between" onclick="toggleCardHighlight(this)">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" name="investigations" value="Schirmer's Diagnostic Strip Profiling" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                            <span class="text-sm font-bold text-gray-800">Schirmer's Test (Volume Profiling)</span>
+                        </div>
+                        <span class="text-[10px] uppercase font-extrabold tracking-wider bg-blue-50 px-2.5 py-1 rounded text-blue-700 border border-blue-100">Volume</span>
+                    </label>
+
+                    <!-- Option 3 -->
+                    <label class="checkbox-card border-2 rounded-xl p-4 flex items-center justify-between" onclick="toggleCardHighlight(this)">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" name="investigations" value="Ocular Surface Staining Score" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                            <span class="text-sm font-bold text-gray-800">Ocular Surface Fluorescein Staining</span>
+                        </div>
+                        <span class="text-[10px] uppercase font-extrabold tracking-wider bg-blue-50 px-2.5 py-1 rounded text-blue-700 border border-blue-100">Tissue Integrity</span>
+                    </label>
+
+                    <!-- Option 4 -->
+                    <label class="checkbox-card border-2 rounded-xl p-4 flex items-center justify-between" onclick="toggleCardHighlight(this)">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" name="investigations" value="Meibomian Gland Evaluation" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                            <span class="text-sm font-bold text-gray-800">Meibography & Meibomian Gland Expression</span>
+                        </div>
+                        <span class="text-[10px] uppercase font-extrabold tracking-wider bg-blue-50 px-2.5 py-1 rounded text-blue-700 border border-blue-100">Lids & Glands</span>
+                    </label>
+
+                    <!-- Option 5 -->
+                    <label class="checkbox-card border-2 rounded-xl p-4 flex items-center justify-between" onclick="toggleCardHighlight(this)">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" name="investigations" value="Tear Meniscus Height Evaluation" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                            <span class="text-sm font-bold text-gray-800">Tear Meniscus Height (TMH Analysis)</span>
+                        </div>
+                        <span class="text-[10px] uppercase font-extrabold tracking-wider bg-blue-50 px-2.5 py-1 rounded text-blue-700 border border-blue-100">Imaging Metrics</span>
+                    </label>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-md hover:bg-blue-700 transition text-base mt-2">
+                    Submit Investigation Record →
+                </button>
+            </div>
+        </form>
+
+        <!-- Screen Capture Optimized Submission Modal Window Display -->
+        <div id="resultModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-3xl max-w-md w-full p-6 text-center shadow-2xl space-y-5 transform scale-95 transition-all border border-gray-100">
+                <div class="w-14 h-14 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-2xl mx-auto font-bold">✓</div>
+                <div>
+                    <h3 class="text-xl font-black text-gray-900 tracking-tight">Investigation Registered</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Secure Clinic Operational Data Pipeline Summary</p>
+                </div>
+
+                <!-- Structured Patient Metadata Overview Box Panel for Screen Capture Trace Logs -->
+                <div class="bg-slate-50 border border-gray-200/60 rounded-2xl p-4 text-left space-y-2 text-xs">
+                    <div class="flex justify-between items-center border-b border-gray-200/50 pb-2">
+                        <span class="text-gray-400 font-semibold uppercase tracking-wider text-[10px]">Patient Name:</span>
+                        <span id="modalPatientName" class="text-gray-900 font-extrabold text-sm">--</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-1">
+                        <span class="text-gray-400 font-semibold uppercase tracking-wider text-[10px]">Date Logged:</span>
+                        <span id="modalDate" class="text-gray-800 font-bold">--</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400 font-semibold uppercase tracking-wider text-[10px]">Timestamp Run:</span>
+                        <span id="modalTime" class="text-gray-800 font-bold">--</span>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-gray-200/50 pt-2">
+                        <span class="text-gray-400 font-semibold uppercase tracking-wider text-[10px]">Clinic Branch:</span>
+                        <span id="modalBranch" class="text-blue-700 font-extrabold uppercase">--</span>
+                    </div>
+                </div>
+
+                <!-- Diagnostics Selected Count Panel Display Box - Styled matching the complete index score block layout -->
+                <div class="bg-gradient-to-b from-blue-50/50 to-blue-50/10 rounded-2xl p-4 border border-blue-100 shadow-inner text-center">
+                    <p class="text-xs font-bold text-blue-500 uppercase tracking-widest">Logged Profile Actions</p>
+                    <p id="modalCount" class="text-[13px] font-extrabold text-slate-800 mt-1.5 leading-relaxed">No elements mapped.</p>
+                </div>
+                <p class="text-[11px] text-gray-400 font-medium">Please screenshot this screen for confirmation records.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Clinic Profiles Footer Section Block Matrix -->
+    <footer class="bg-white border-t border-gray-200 mt-auto w-full">
+        <div class="max-w-2xl mx-auto px-4 py-6 space-y-6">
+            
+            <!-- Team Credentials Block -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-100 pb-5">
+                <!-- Dr. Kenshuk Marwah -->
+                <div class="flex gap-3 items-start">
+                    <img class="w-12 h-12 rounded-full object-cover bg-blue-50 border-2 border-blue-100 flex-shrink-0" src="doctor-profile.png" alt="Dr. Kenshuk Marwah" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=KM'">
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-900 leading-tight">Dr. Kenshuk Marwah</h4>
+                        <p class="text-[10px] text-gray-400 font-bold mt-0.5">MBBS, MS, DNB, FVRS, FICO, FAICO</p>
+                        <p class="text-[10px] text-gray-600 font-medium leading-tight mt-1">
+                            Senior Consultant Ophthalmologist & Vitreo-Retina Specialist<br>
+                            CMO - Shivom Eye Care | 18 Years Experience<br>
+                            <span class="text-indigo-600 font-semibold">Visiting Consultant, Fortis Gurugram</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Ms. Yamuna Acharya -->
+                <div class="flex gap-3 items-start border-t md:border-t-0 md:border-l border-gray-100 pt-3 md:pt-0 md:pl-4">
+                    <img class="w-12 h-12 rounded-full object-cover bg-indigo-50 border-2 border-indigo-100 flex-shrink-0" src="Yamuna.png" alt="Ms. Yamuna Acharya" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=YA'">
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-900 leading-tight">Ms. Yamuna Acharya (MOptom)</h4>
+                        <p class="text-[10px] text-indigo-600 font-bold mt-0.5">Senior Optometrist & Application Designer</p>
+                        <p class="text-[10px] text-gray-500 font-medium mt-1">Refractive, Ocular Surface & Dry Eye Consultant</p>
+                        <a href="mailto:yamunaacharya88@gmail.com" class="text-[10px] text-blue-500 hover:underline mt-0.5 inline-block">yamunaacharya88@gmail.com</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clinic Contact Locations Matrix -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div class="bg-slate-50 p-3.5 rounded-xl border flex flex-col justify-between">
+                    <div>
+                        <span class="font-extrabold text-blue-800 text-[11px] uppercase block tracking-wider">🏢 Gurugram Branch</span>
+                        <p class="text-gray-600 text-[11px] mt-1 leading-relaxed font-medium">B-80, Mayfield Garden, Near Baani Square, Sector 50, Gurugram, Haryana</p>
+                    </div>
+                    <div class="mt-3 pt-2 border-t flex gap-2">
+                        <a href="tel:+919485740077" class="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-[10px] transition">📞 Call: 94857 40077</a>
+                        <a href="https://wa.me/919485740077" target="_blank" class="flex-1 text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-[10px] transition">💬 WhatsApp</a>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-50 p-3.5 rounded-xl border flex flex-col justify-between">
+                    <div>
+                        <span class="font-extrabold text-indigo-800 text-[11px] uppercase block tracking-wider">🏢 Delhi / Kalkaji Branch</span>
+                        <p class="text-gray-600 text-[11px] mt-1 leading-relaxed font-medium">L-1/123 A, DDA Flats, Kalkaji, New Delhi – 110019</p>
+                    </div>
+                    <div class="mt-3 pt-2 border-t flex gap-2">
+                        <a href="tel:+917827133830" class="flex-1 text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg text-[10px] transition">📞 Call: 78271 33830</a>
+                        <a href="https://wa.me/917827133830" target="_blank" class="flex-1 text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-[10px] transition">💬 WhatsApp</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Form Dynamic Interactions Logic Orchestration -->
+    <script>
+        // Branch Selection Toggle Control Engine
+        function selectBranch(branchName, element) {
+            document.getElementById('selected_branch').value = branchName;
+            document.querySelectorAll('.branch-btn').forEach(btn => {
+                btn.className = btn.innerHTML.includes('Gurugram') 
+                    ? "branch-btn border-2 border-blue-200 text-blue-900 bg-blue-50/30 p-4 rounded-xl font-bold text-center hover:bg-blue-50"
+                    : "branch-btn border-2 border-indigo-200 text-indigo-900 bg-indigo-50/30 p-4 rounded-xl font-bold text-center hover:bg-indigo-50";
+            });
+            
+            if(branchName === 'Gurugram') {
+                element.className = "branch-btn border-2 border-blue-600 bg-blue-600 text-white p-4 rounded-xl font-bold text-center ring-4 ring-blue-600/20 shadow-md";
+            } else {
+                element.className = "branch-btn border-2 border-indigo-600 bg-indigo-600 text-white p-4 rounded-xl font-bold text-center ring-4 ring-indigo-600/20 shadow-md";
+            }
+        }
+
+        // Checkbox Highlight State Sync Logic
+        function toggleCardHighlight(element) {
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            // Timeout avoids desyncing issues when hitting text directly
+            setTimeout(() => {
+                if (checkbox.checked) {
+                    element.classList.add('selected');
+                } else {
+                    element.classList.remove('selected');
+                }
+            }, 50);
+        }
+
+        // Endpoint Data Transmission Pipeline
+        async function executeSubmissionPipeline(event) {
+            event.preventDefault();
+
+            const branchSelected = document.getElementById('selected_branch').value;
+            if(!branchSelected) {
+                alert("Please select an operating branch location before submitting profile data.");
+                return;
+            }
+
+            // Verify at least one item is chosen
+            const checkBoxes = document.querySelectorAll('input[name="investigations"]:checked');
+            if (checkBoxes.length === 0) {
+                alert("Please tick at least one clinical investigation component parameter run.");
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Transmitting to Google Sheet...";
+
+            const form = document.getElementById('investigationForm');
+            const patientNameVal = document.getElementById('patient_name').value;
+            const targetBranchVal = document.getElementById('selected_branch').value;
+
+            const trackingTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            const trackingDate = new Date().toLocaleDateString('en-GB'); // Formats cleanly as DD/MM/YYYY
+
+            // Collate Array items into a clean comma-separated list string
+            const elementsSelected = Array.from(checkBoxes).map(cb => cb.value).join(', ');
+
+            const payload = {
+                timestamp: trackingTime,
+                date: trackingDate,
+                patient_name: patientNameVal,
+                age: form.age.value,
+                phone: form.phone.value,
+                notes: form.notes.value || "None logged",
+                branch: targetBranchVal,
+                investigations_profile: elementsSelected
+            };
+
+            try {
+                // Outbound POST request payload to Web App script engine
+                await fetch(CONFIG.GOOGLE_SHEET_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                // Display tracking confirmation parameters within screenshot canvas view
+                document.getElementById('modalPatientName').innerText = patientNameVal;
+                document.getElementById('modalDate').innerText = trackingDate;
+                document.getElementById('modalTime').innerText = trackingTime;
+                document.getElementById('modalBranch').innerText = targetBranchVal;
+                document.getElementById('modalCount').innerText = `${elementsSelected}`;
+
+                document.getElementById('resultModal').style.display = 'flex';
+                form.reset();
+                document.querySelectorAll('.checkbox-card').forEach(card => card.classList.remove('selected'));
+            } catch(err) {
+                alert("Data sync fallback exception caught.");
+                console.error(err);
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Submit Investigation Record";
+            }
+        }
+    </script>
+</body>
+</html>
