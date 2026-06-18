@@ -298,7 +298,7 @@
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Schirmer I Volume [mm/5min] ✱</label>
-                            <input type="number" id="osChirmer" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                            <input type="number" id="osSchirmer" required class="w-full border border-gray-300 rounded-xl p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-gray-500 mb-0.5 uppercase tracking-wide">Corneal Fluorescein [NEI Score 0-15] ✱</label>
@@ -569,6 +569,7 @@
         }
 
         function processDryEyeEngine() {
+            // Demographics Mapping Elements
             const branch = document.getElementById('branch').value;
             const patientName = document.getElementById('patientName').value;
             const age = document.getElementById('age').value;
@@ -581,6 +582,7 @@
             const slitLampFindings = document.getElementById('slitLampFindings').value;
             const osdi = parseFloat(document.getElementById('osdi').value);
 
+            // Objective Bilateral Markers
             const odTbut = parseFloat(document.getElementById('odTbut').value);
             const osTbut = parseFloat(document.getElementById('osTbut').value);
             const odSchirmer = parseInt(document.getElementById('odSchirmer').value);
@@ -588,6 +590,7 @@
             const odStaining = parseInt(document.getElementById('odStaining').value);
             const osStaining = parseInt(document.getElementById('osStaining').value);
 
+            // Optional Dropdowns mapping logic bounds
             const odLissamine = document.getElementById('odLissamine').value;
             const osLissamine = document.getElementById('osLissamine').value;
             const odOsmolarity = document.getElementById('odOsmolarity').value;
@@ -601,6 +604,7 @@
             const odMgd = document.getElementById('odMgd').value;
             const osMgd = document.getElementById('osMgd').value;
 
+            // Systemic Checklist Mapping Loops
             let flags = [];
             if(document.getElementById('sys_sjogren').checked) flags.push("Sjögren's Syndrome");
             if(document.getElementById('sys_ra').checked) flags.push("Rheumatoid Arthritis");
@@ -610,6 +614,7 @@
             if(document.getElementById('med_accutane').checked) flags.push("Oral Isotretinoin");
             let flagsText = flags.length > 0 ? flags.join(", ") : "None Hooked";
 
+            // Enumerate Performed Investigations List Parameters
             let performedList = ["OSDI", "TBUT", "Schirmer I", "Fluorescein Staining"];
             if(odLissamine !== "NP") performedList.push("Lissamine");
             if(odOsmolarity !== "NP") performedList.push("Osmolarity");
@@ -618,10 +623,12 @@
             if(odMmp9 !== "NP") performedList.push("MMP-9");
             document.getElementById('perfTests').innerText = performedList.join(", ");
 
+            // Diagnostic Calculation Threshold Logic
             let symptomPos = osdi >= 13;
             let odHomeoBroken = (odTbut < 10 || odSchirmer < 10 || odStaining > 5);
             let osHomeoBroken = (osTbut < 10 || osSchirmer < 10 || osStaining > 5);
 
+            // Append optional values if mapped cleanly
             if(odOsmolarity !== "NP" && osOsmolarity !== "NP") {
                 let osmolDeltaVal = Math.abs(parseInt(odOsmolarity) - parseInt(osOsmolarity));
                 if(parseInt(odOsmolarity) >= 300 || parseInt(osOsmolarity) >= 300 || osmolDeltaVal >= 8) {
@@ -697,11 +704,11 @@
                     if(f==="Sjögren's Syndrome" || f==="Rheumatoid Arthritis") {
                         threatHTML += "<li><strong>" + f + " Risk:</strong> severe immune-driven fibrosis. Thinning hazard.</li>";
                     } else if(f==="Oral Isotretinoin") {
-                        threatHTML += "<li><strong>Isotretinoin Matrix:</strong> Drives permanent meibomian structural dropout.</li>";
+                        threatHTML += "<li><strong>Isotretinoin Medication Matrix:</strong> Drives permanent meibomian structural dropout.</li>";
                     } else if(f==="Diabetes Mellitus") {
                         threatHTML += "<li><strong>Neurotrophic Sign Variant:</strong> Masks physiological pain pathways.</li>";
                     } else {
-                        threatHTML += "<li><strong>" + f + " Condition:</strong> Accelerates evaporation profiles.</li>";
+                        threatHTML += "<li><strong>" + f + " Condition:</strong> Evaluates higher evaporation rates.</li>";
                     }
                 });
                 threatHTML += "</ul>";
